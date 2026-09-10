@@ -9,6 +9,7 @@ interface ChallengeWorkspaceProps {
   onCodeChange: (code: string) => void;
   solved: boolean;
   onSolved: () => void;
+  onUnsolved: () => void;
   onBack: () => void;
   onPrev?: () => void;
   onNext?: () => void;
@@ -28,6 +29,7 @@ export default function ChallengeWorkspace({
   onCodeChange,
   solved,
   onSolved,
+  onUnsolved,
   onBack,
   onPrev,
   onNext,
@@ -78,6 +80,17 @@ export default function ChallengeWorkspace({
 
   const paragraphs = useMemo(() => challenge.prompt.split('\n\n'), [challenge.prompt]);
 
+  /** Wipes every trace of the attempt so the challenge can be tried again cold. */
+  function startOver() {
+    onUnsolved();
+    onCodeChange(challenge.starter);
+    setResetToken((n) => n + 1);
+    setHintsShown(0);
+    setShowSolution(false);
+    setResult(null);
+    setFailure(null);
+  }
+
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -122,8 +135,16 @@ export default function ChallengeWorkspace({
             {challenge.difficulty}
           </span>
           {solved && (
-            <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-0.5 text-xs font-medium text-emerald-300">
+            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 py-0.5 pl-2.5 pr-1 text-xs font-medium text-emerald-300">
               solved
+              <button
+                type="button"
+                onClick={startOver}
+                title="Mark unsolved, reset the code and hide the hints"
+                className="rounded-full px-2 py-0.5 text-emerald-200/70 transition hover:bg-emerald-400/20 hover:text-emerald-100"
+              >
+                undo
+              </button>
             </span>
           )}
         </div>
@@ -203,56 +224,57 @@ export default function ChallengeWorkspace({
         <div className="space-y-4">
           <section>
             <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Tests
+              Tests <span className="text-slate-600">({challenge.tests.length})</span>
             </h2>
             {failure && (
-              <p className="rounded-lg border border-rose-400/30 bg-rose-400/10 px-3 py-2 text-sm text-rose-200">
+              <p className="mb-2 rounded-lg border border-rose-400/30 bg-rose-400/10 px-3 py-2 text-sm text-rose-200">
                 {failure}
               </p>
             )}
-            {!result && !failure && (
-              <p className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-6 text-center text-sm text-slate-500">
-                Run the tests to see results. The Python runtime downloads once, on first run.
-              </p>
-            )}
             {result?.error && (
-              <pre className="overflow-x-auto whitespace-pre-wrap rounded-lg border border-rose-400/30 bg-rose-400/10 px-3 py-2 font-mono text-xs text-rose-200">
+              <pre className="mb-2 overflow-x-auto whitespace-pre-wrap rounded-lg border border-rose-400/30 bg-rose-400/10 px-3 py-2 font-mono text-xs text-rose-200">
                 {result.error}
               </pre>
             )}
-            {result && !result.error && (
-              <ul className="space-y-2">
-                {result.outcomes.map((outcome, i) => (
-                  <li
-                    key={i}
-                    className={`rounded-lg border px-3 py-2 font-mono text-xs ${
-                      outcome.ok
-                        ? 'border-emerald-400/25 bg-emerald-400/[0.07] text-emerald-200'
-                        : 'border-rose-400/25 bg-rose-400/[0.07] text-rose-200'
-                    }`}
-                  >
+            <ul className="space-y-2">
+              {challenge.tests.map((test, i) => {
+                const outcome = result?.error ? undefined : result?.outcomes[i];
+                const tone = !outcome
+                  ? 'border-white/10 bg-white/[0.03] text-slate-300'
+                  : outcome.ok
+                    ? 'border-emerald-400/25 bg-emerald-400/[0.07] text-emerald-200'
+                    : 'border-rose-400/25 bg-rose-400/[0.07] text-rose-200';
+                return (
+                  <li key={i} className={`rounded-lg border px-3 py-2 font-mono text-xs ${tone}`}>
                     <div className="flex items-start gap-2">
-                      <span aria-hidden>{outcome.ok ? '✓' : '✗'}</span>
+                      <span aria-hidden className="text-slate-500">
+                        {!outcome ? '·' : outcome.ok ? '✓' : '✗'}
+                      </span>
                       <span className="min-w-0">
-                        {challenge.tests[i]?.setup && (
+                        {test.setup && (
                           <span className="block whitespace-pre-wrap break-all opacity-50">
-                            {challenge.tests[i].setup}
+                            {test.setup}
                           </span>
                         )}
-                        <span className="block whitespace-pre-wrap break-all">{outcome.call}</span>
+                        <span className="block whitespace-pre-wrap break-all">{test.call}</span>
                       </span>
                     </div>
-                    {!outcome.ok && (
-                      <div className="mt-1.5 space-y-0.5 pl-5 text-[11px] text-slate-400">
-                        <div className="whitespace-pre-wrap break-all">
-                          expected: {outcome.expected}
-                        </div>
-                        <div className="whitespace-pre-wrap break-all">got: {outcome.got}</div>
+                    <div className="mt-1.5 space-y-0.5 pl-5 text-[11px] text-slate-400">
+                      <div className="whitespace-pre-wrap break-all">
+                        expected: {outcome ? outcome.expected : test.expected}
                       </div>
-                    )}
+                      {outcome && !outcome.ok && (
+                        <div className="whitespace-pre-wrap break-all">got: {outcome.got}</div>
+                      )}
+                    </div>
                   </li>
-                ))}
-              </ul>
+                );
+              })}
+            </ul>
+            {!result && !failure && (
+              <p className="mt-2 text-center text-xs text-slate-600">
+                The Python runtime downloads once, on your first run.
+              </p>
             )}
             {passed && (
               <p className="mt-3 rounded-lg border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-sm font-medium text-emerald-200">

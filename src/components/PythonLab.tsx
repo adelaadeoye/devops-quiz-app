@@ -17,6 +17,17 @@ export default function PythonLab({ onExit }: { onExit: () => void }) {
     [setSolved],
   );
 
+  const markUnsolved = useCallback(
+    (id: string) =>
+      setSolved((current) => {
+        if (!current[id]) return current;
+        const next = { ...current };
+        delete next[id];
+        return next;
+      }),
+    [setSolved],
+  );
+
   const challenge = openId ? getChallenge(openId) : undefined;
 
   if (!challenge) {
@@ -49,6 +60,7 @@ export default function PythonLab({ onExit }: { onExit: () => void }) {
       onCodeChange={(code) => setDrafts((current) => ({ ...current, [challenge.id]: code }))}
       solved={Boolean(solved[challenge.id])}
       onSolved={() => markSolved(challenge.id)}
+      onUnsolved={() => markUnsolved(challenge.id)}
       onBack={() => setOpenId(null)}
       onPrev={index > 0 ? () => go(index - 1) : undefined}
       onNext={index < challenges.length - 1 ? () => go(index + 1) : undefined}
