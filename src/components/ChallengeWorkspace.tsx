@@ -167,7 +167,7 @@ export default function ChallengeWorkspace({
             >
               {running ? 'Running…' : 'Run tests'}
             </button>
-            {challenge.hints && hintsShown < challenge.hints.length && (
+            {hintsShown < challenge.hints.length && (
               <button
                 type="button"
                 onClick={() => setHintsShown((n) => n + 1)}
@@ -186,7 +186,7 @@ export default function ChallengeWorkspace({
             {running && status && <span className="text-xs text-slate-500">{status}</span>}
           </div>
 
-          {challenge.hints && hintsShown > 0 && (
+          {hintsShown > 0 && (
             <ul className="mt-4 space-y-2">
               {challenge.hints.slice(0, hintsShown).map((hint) => (
                 <li

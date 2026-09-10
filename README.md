@@ -9,17 +9,19 @@ Practice quiz app with two role tracks, modelled on [kcna-quiz-app](https://gith
 
 Every question has a written explanation. Multi-select questions are labelled with how many options to pick.
 
-Plus a **Python data structures lab**: 155 coding challenges on `list`, `dict`, `set`, `tuple`, `str`
-and `collections`/`itertools`, each with a starter snippet, a test suite, a reference solution and an
-explanation. Your code runs against real CPython in the browser via [Pyodide](https://pyodide.org)
-(WebAssembly) — nothing is uploaded and no backend is involved.
+Plus a **Python data structures lab**: 255 coding challenges on `list`, `dict`, `set`, `tuple`, `str`
+and `collections`/`itertools`, each with a starter snippet, a test suite, a reference solution, an
+explanation and three progressively stronger hints. Your code runs against real CPython in the
+browser via [Pyodide](https://pyodide.org) (WebAssembly) — nothing is uploaded and no backend is
+involved.
 
 ## Features
 
 - **Practice mode** — check each answer immediately and read the explanation as you go.
 - **Exam mode** — answers stay hidden until you submit the whole paper.
-- **Python lab** — CodeMirror editor, per-test pass/fail with expected vs. actual, staged hints, and
-  captured `print()` output. Filter by topic and difficulty; solved challenges and code drafts persist.
+- **Python lab** — CodeMirror editor, per-test pass/fail with expected vs. actual, hints revealed one
+  at a time, and captured `print()` output. Filter by topic and difficulty; solved challenges and code
+  drafts persist.
 - Topic filters, quiz length selection, and optional answer-option shuffling.
 - Question navigator with answered/flagged/correct state, and flag-for-review.
 - Results with per-topic breakdown, a filterable review of every question, and a "retry missed" run.
@@ -36,8 +38,8 @@ npm run verify:challenges # run every Python reference solution against its own 
 ```
 
 `verify:challenges` needs a local `python3`. It asserts that each reference solution passes all of its
-test cases and that each starter snippet does *not* — run it after editing anything in
-`src/data/python`.
+test cases, that each starter snippet does *not*, that every id is unique, and that every challenge has
+exactly three hints — run it after editing anything in `src/data/python`.
 
 ## Deploying to GitHub Pages
 
@@ -97,12 +99,13 @@ type in [src/types.ts](src/types.ts):
   ],
   solution: '...',
   explanation: 'Why it works, and the trap it avoids.',
-  hints: ['Revealed one at a time.'],
+  hints: ['Gentle nudge.', 'The technique to use.', 'Near-solution.'],   // exactly three
 }
 ```
 
 `call` and `expected` are Python source evaluated after the submitted code, each in a fresh copy of the
-namespace, so mutating tests cannot leak into one another. Run `npm run verify:challenges` afterwards.
+namespace, so mutating tests cannot leak into one another. `hints` is a fixed three-element tuple type,
+so a missing hint is a compile error. Run `npm run verify:challenges` afterwards.
 
 ## Disclaimer
 

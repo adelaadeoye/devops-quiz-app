@@ -74,7 +74,8 @@ export interface Challenge {
   tests: ChallengeTest[];
   solution: string;
   explanation: string;
-  hints?: string[];
+  /** Revealed one at a time, ordered from the gentlest nudge to the strongest. */
+  hints: [string, string, string];
 }
 
 export interface TestOutcome {

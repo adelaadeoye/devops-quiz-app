@@ -17,7 +17,11 @@ export const setChallenges: Challenge[] = [
     solution: 'def common(a, b):\n    return sorted(set(a) & set(b))\n',
     explanation:
       '`&` is set intersection; `set(a).intersection(b)` is the method form and accepts any iterable, so it avoids building the second set. Sets have no order, so `sorted()` is what makes the result deterministic — returning `list(set(...))` would give an order that can change between runs.',
-    hints: ['`&` intersects two sets.'],
+    hints: [
+      'A nested loop works but is O(n*m) — convert to sets first.',
+      '`&` intersects two sets.',
+      'Sets have no order, so wrap the result: `sorted(set(a) & set(b))`.',
+    ],
   },
   {
     id: 'set-002',
@@ -34,7 +38,11 @@ export const setChallenges: Challenge[] = [
     solution: 'def only_in_first(a, b):\n    return sorted(set(a) - set(b))\n',
     explanation:
       'Set difference `-` is asymmetric: `a - b` keeps what only `a` has. If you want values unique to either side, that is the symmetric difference `^`. Converting to sets first is what turns an O(n*m) nested loop into O(n+m).',
-    hints: ['Subtracting sets is allowed.'],
+    hints: [
+      '"In a but not in b" has a direct set operator.',
+      'Subtracting sets is allowed, and it is asymmetric.',
+      '`sorted(set(a) - set(b))`.',
+    ],
   },
   {
     id: 'set-003',
@@ -51,7 +59,11 @@ export const setChallenges: Challenge[] = [
     solution: 'def overlaps(a, b):\n    return not set(a).isdisjoint(b)\n',
     explanation:
       '`isdisjoint` short-circuits on the first shared element and does not build the intersection, so it is both faster and clearer than `len(set(a) & set(b)) > 0`. Returning `not ...` gives a real `bool`, which matters if the caller compares against `True`.',
-    hints: ['There is a method that answers "no elements in common".'],
+    hints: [
+      'You do not need the shared values, only whether any exist.',
+      'There is a method that answers "no elements in common".',
+      '`not set(a).isdisjoint(b)` — it short-circuits and returns a real `bool`.',
+    ],
   },
   {
     id: 'set-004',
@@ -69,7 +81,11 @@ export const setChallenges: Challenge[] = [
       'def duplicates(items):\n    seen = set()\n    repeated = set()\n    for item in items:\n        if item in seen:\n            repeated.add(item)\n        else:\n            seen.add(item)\n    return sorted(repeated)\n',
     explanation:
       'Two sets in a single pass: `seen` records everything, `repeated` records the second sighting. Collecting into a set rather than a list means a value seen three times is still reported once. `Counter` gives the same answer in one line if you are allowed to import.',
-    hints: ['One set for "seen", one for "seen twice".'],
+    hints: [
+      'A single set is not enough to tell "seen" from "seen again".',
+      'One set for "seen", one for "seen twice".',
+      'Collect repeats in a set so a value seen three times is still reported once.',
+    ],
   },
   {
     id: 'set-005',
@@ -86,7 +102,11 @@ export const setChallenges: Challenge[] = [
     solution: 'def all_unique(items):\n    return len(set(items)) == len(items)\n',
     explanation:
       'Building the set costs O(n) time and O(n) memory but replaces a quadratic scan. Careful: this requires the items to be hashable, and it treats `1`, `1.0` and `True` as the same value because they hash equal.',
-    hints: ['Compare two lengths.'],
+    hints: [
+      'Duplicates disappear when you build a set — that is measurable.',
+      'Compare two lengths.',
+      '`len(set(items)) == len(items)`.',
+    ],
   },
   {
     id: 'set-006',
@@ -105,7 +125,11 @@ export const setChallenges: Challenge[] = [
       'def unique_groups(groups):\n    return len({frozenset(group) for group in groups})\n',
     explanation:
       'A `set` is unhashable and cannot be an element of another set — `frozenset` is its immutable, hashable counterpart. Converting each group to a frozenset makes `[1, 2]` and `[2, 1]` compare equal, which is exactly the "ignore order and duplicates" requirement.',
-    hints: ['A set cannot contain a set.', 'Which built-in type is a hashable set?'],
+    hints: [
+      'Ignoring order and duplicates inside a group means each group is really a set.',
+      'But a set cannot contain a set — sets are unhashable.',
+      'Which built-in type is a hashable set? `len({frozenset(g) for g in groups})`.',
+    ],
   },
   {
     id: 'set-007',
@@ -124,7 +148,11 @@ export const setChallenges: Challenge[] = [
     solution: 'def has_required(granted, required):\n    return set(required) <= set(granted)\n',
     explanation:
       '`<=` is the subset operator (`issubset` is the method form). The empty set is a subset of everything, so the empty-requirement case is correct for free. Note `<` means *proper* subset and would wrongly return `False` when the two sets are equal.',
-    hints: ['Subset, not intersection.', 'Watch out for `<` versus `<=`.'],
+    hints: [
+      'Subset, not intersection.',
+      'Watch out for `<` versus `<=` — one of them rejects equal sets.',
+      '`set(required) <= set(granted)`, which is `True` for an empty requirement.',
+    ],
   },
   {
     id: 'set-008',
@@ -156,7 +184,11 @@ export const setChallenges: Challenge[] = [
       'def drop_short(words, n):\n    for word in [w for w in words if len(w) < n]:\n        words.remove(word)\n',
     explanation:
       'You cannot add to or remove from a set (or dict) while iterating it — the iterator is invalidated. Materialise the doomed items into a list first, then remove them. `words -= {w for w in words if len(w) < n}` also works and mutates in place; `words = words - ...` would not, because it rebinds the local name.',
-    hints: ['Take a snapshot of what to delete before deleting.', '`-=` mutates a set in place.'],
+    hints: [
+      'You cannot change a set\u2019s size while iterating over it.',
+      'Take a snapshot of what to delete before deleting.',
+      'Loop over a list comprehension of the doomed words, or use `words -= {...}`.',
+    ],
   },
   {
     id: 'set-009',
@@ -173,7 +205,11 @@ export const setChallenges: Challenge[] = [
     solution: 'def only_one_side(a, b):\n    return sorted(set(a) ^ set(b))\n',
     explanation:
       '`^` is the symmetric difference: everything except the intersection. It is equivalent to `(a - b) | (b - a)` but done in one pass, and unlike `-` it is commutative.',
-    hints: ['`^` on sets.'],
+    hints: [
+      '"In exactly one" is everything except the intersection.',
+      'There is a single operator for it: `^` on sets.',
+      '`sorted(set(a) ^ set(b))`, equivalent to `(a - b) | (b - a)`.',
+    ],
   },
   {
     id: 'set-010',
@@ -191,7 +227,11 @@ export const setChallenges: Challenge[] = [
       'def all_tags(groups):\n    result = set()\n    for group in groups:\n        result.update(group)\n    return sorted(result)\n',
     explanation:
       '`set.update()` accepts any iterable and unions in place, so no intermediate sets are created. `set().union(*groups)` is the one-liner, and `set.union` also takes plain lists as arguments.',
-    hints: ['`set.update` takes any iterable.'],
+    hints: [
+      'Accumulate into one set as you walk the groups.',
+      '`set.update` takes any iterable, so no inner conversion is needed.',
+      'Or in one line: `sorted(set().union(*groups))`.',
+    ],
   },
   {
     id: 'set-011',
@@ -216,7 +256,11 @@ export const setChallenges: Challenge[] = [
     solution: 'def add_tag(tags, tag):\n    tags.add(tag)\n',
     explanation:
       '`update` iterates its argument, and a string iterates character by character — so `update("abc")` adds three single-character entries. `add` inserts the object as a single element. The same trap applies to `list.extend` versus `list.append`.',
-    hints: ['What happens when you iterate a string?'],
+    hints: [
+      'Run the starter mentally on `\'abc\'` and count the elements added.',
+      'What happens when you iterate a string?',
+      '`update` iterates its argument; `add` inserts the object whole.',
+    ],
   },
   {
     id: 'set-012',
@@ -233,7 +277,11 @@ export const setChallenges: Challenge[] = [
     solution: 'def covers(available, needed):\n    return set(available) >= set(needed)\n',
     explanation:
       '`>=` is `issuperset`. Unlike numbers, set comparison is a *partial* order: two sets can be neither a subset nor a superset of each other, so `not (a >= b)` does not imply `a < b`.',
-    hints: ['Superset is the mirror of subset.'],
+    hints: [
+      'This is the subset question asked from the other side.',
+      'Superset is the mirror of subset.',
+      '`set(available) >= set(needed)`.',
+    ],
   },
   {
     id: 'set-013',
@@ -252,7 +300,11 @@ export const setChallenges: Challenge[] = [
       'def missing_fields(record, required):\n    return sorted(set(required) - record.keys())\n',
     explanation:
       '`record.keys()` is a set-like view, so it can be subtracted from a set directly with no conversion. This is a common validation pattern and is much clearer than a loop with an `if key not in record` check.',
-    hints: ['Key views support set operations.'],
+    hints: [
+      '"Required but not present" is a set difference.',
+      'Key views support set operations directly — no `set(record)` needed.',
+      '`sorted(set(required) - record.keys())`.',
+    ],
   },
   {
     id: 'set-014',
@@ -270,7 +322,11 @@ export const setChallenges: Challenge[] = [
     solution: 'def dedupe_sorted(items):\n    return sorted(set(items))\n',
     explanation:
       'A set has no defined order; `list(set(...))` happens to look sorted for small integers because of how they hash, which makes the bug pass casual testing and fail on strings or larger values. Always sort explicitly when the order matters.',
-    hints: ['Why does `list(set(...))` sometimes look sorted?'],
+    hints: [
+      'The starter passes the small case and fails the other one — ask why.',
+      'Why does `list(set(...))` sometimes look sorted? Small ints hash to themselves.',
+      'Never rely on it: `sorted(set(items))`.',
+    ],
   },
   {
     id: 'set-015',
@@ -287,7 +343,11 @@ export const setChallenges: Challenge[] = [
     solution: 'def same_contents(a, b):\n    return set(a) == set(b)\n',
     explanation:
       'Set equality ignores both order and multiplicity. If multiplicity matters — "same items, same counts" — you need `Counter(a) == Counter(b)` instead. Knowing which of the two the question asks for is the real skill here.',
-    hints: ['What if the counts mattered too?'],
+    hints: [
+      'Order and repetition both have to be ignored.',
+      'Set equality already does exactly that.',
+      '`set(a) == set(b)` — use `Counter(a) == Counter(b)` if the counts mattered too.',
+    ],
   },
   {
     id: 'set-016',
@@ -304,7 +364,11 @@ export const setChallenges: Challenge[] = [
       'def initials(names):\n    return sorted({name[0].lower() for name in names})\n',
     explanation:
       'Braces with a single expression create a set comprehension; add a colon and it becomes a dict comprehension. Note that `{}` alone is an empty *dict* — the only way to write an empty set literal is `set()`.',
-    hints: ['How do you write an empty set literal?'],
+    hints: [
+      'Braces with a single expression build a set, not a dict.',
+      'How do you write an empty set literal? (`{}` is a dict.)',
+      '`sorted({name[0].lower() for name in names})`.',
+    ],
   },
   {
     id: 'set-017',
@@ -323,7 +387,11 @@ export const setChallenges: Challenge[] = [
       'def first_repeat(items):\n    seen = set()\n    for item in items:\n        if item in seen:\n            return item\n        seen.add(item)\n    return None\n',
     explanation:
       'Returning on the first repeat means the loop exits as early as possible — O(n) time, and O(k) memory in the number of distinct values seen so far. Using `items.count(item)` inside a loop would be O(n²).',
-    hints: ['Return as soon as you see a repeat.'],
+    hints: [
+      '`items.count(item)` inside a loop would be O(n²).',
+      'Keep a set of what you have already seen.',
+      'Return as soon as you see a repeat — that is what makes it "first".',
+    ],
   },
   {
     id: 'set-018',
@@ -342,7 +410,11 @@ export const setChallenges: Challenge[] = [
       'def unique_edges(edges):\n    return len({tuple(sorted(edge)) for edge in edges})\n',
     explanation:
       'Sorting each pair produces a canonical form, so both directions collapse to the same key. `frozenset(edge)` would also ignore direction but additionally collapses a self-loop `(1, 1)` to a single element — still counted once here, but the distinction matters when edges carry weights.',
-    hints: ['Find a canonical form for each edge.'],
+    hints: [
+      '`(1, 2)` and `(2, 1)` must collapse to the same thing.',
+      'Find a canonical form for each edge.',
+      '`len({tuple(sorted(edge)) for edge in edges})`.',
+    ],
   },
   {
     id: 'set-019',
@@ -362,7 +434,11 @@ export const setChallenges: Challenge[] = [
       'def in_all(groups):\n    if not groups:\n        return []\n    common = set(groups[0])\n    for group in groups[1:]:\n        common &= set(group)\n    return sorted(common)\n',
     explanation:
       'Seeding from the first group and intersecting the rest avoids the "intersection of nothing" problem — mathematically that would be the universal set, which Python cannot represent. Starting from `set()` instead would always return an empty result.',
-    hints: ['What is the intersection of zero sets?', 'Seed from the first group.'],
+    hints: [
+      'What is the intersection of zero sets? Python cannot represent it.',
+      'Seed from the first group, then intersect the rest.',
+      'Guard the empty outer list first, then `common &= set(group)` in a loop.',
+    ],
   },
   {
     id: 'set-020',
@@ -387,7 +463,11 @@ export const setChallenges: Challenge[] = [
     solution: 'def forget(tags, tag):\n    tags.discard(tag)\n',
     explanation:
       '`remove` raises `KeyError` when the value is absent; `discard` is the silent version. Use `remove` when absence is a genuine bug you want to hear about, and `discard` when it is expected.',
-    hints: ['One of the two raises.'],
+    hints: [
+      'The starter is right except for one edge case.',
+      'One of the two removal methods raises when the value is absent.',
+      '`discard` is the silent one.',
+    ],
   },
   {
     id: 'set-021',
@@ -406,7 +486,11 @@ export const setChallenges: Challenge[] = [
       'def shared_letters(a, b):\n    return sorted(set(a.lower()) & set(b.lower()))\n',
     explanation:
       '`set("hello")` builds a set of characters directly, since strings are iterable. Lowercasing before the conversion means `H` and `h` collapse into one element rather than staying distinct.',
-    hints: ['`set()` of a string gives its characters.'],
+    hints: [
+      '`set()` of a string gives its characters.',
+      'Normalise the case before building the sets, not after.',
+      '`sorted(set(a.lower()) & set(b.lower()))`.',
+    ],
   },
   {
     id: 'set-022',
@@ -427,6 +511,332 @@ export const setChallenges: Challenge[] = [
       'def index_by_tags(records):\n    groups = {}\n    for name, tags in records:\n        groups.setdefault(frozenset(tags), []).append(name)\n    return {key: sorted(names) for key, names in groups.items()}\n',
     explanation:
       'A `frozenset` is hashable, so it can be a dict key, and it compares equal regardless of the original order — which is what makes `["x", "y"]` and `["y", "x"]` group together. A plain `set` would raise `TypeError: unhashable type: set`.',
-    hints: ['A set cannot be a dict key.', 'Order within the tags must not matter.'],
+    hints: [
+      'A set cannot be a dict key — it is unhashable.',
+      'Order within the tags must not matter, so a tuple is wrong too.',
+      '`groups.setdefault(frozenset(tags), []).append(name)`.',
+    ],
+  },  {
+    id: 'set-023',
+    title: 'Set operations preserve nothing',
+    topic: 'set',
+    difficulty: 'medium',
+    prompt:
+      'Write `first_common(a, b)` returning the first value in `a` that also appears in `b`, or `None`.\n\nOrder is defined by `a`.',
+    starter: 'def first_common(a, b):\n    ...\n',
+    tests: [
+      { call: 'first_common([3, 1, 2], [1, 2])', expected: '1' },
+      { call: 'first_common([1], [2])', expected: 'None' },
+      { call: 'first_common([], [1])', expected: 'None' },
+    ],
+    solution:
+      'def first_common(a, b):\n    lookup = set(b)\n    return next((item for item in a if item in lookup), None)\n',
+    explanation:
+      '`set(a) & set(b)` would answer "which values" but not "which came first", because a set has no order. Converting only `b` keeps `a` as an ordered sequence while still getting O(1) membership tests.',
+    hints: [
+      '`set(a) & set(b)` loses the ordering you need.',
+      'Only one of the two collections needs converting.',
+      'Convert `b` to a set, then iterate `a` in order.',
+    ],
   },
-];
+  {
+    id: 'set-024',
+    title: 'Update versus union',
+    topic: 'set',
+    difficulty: 'medium',
+    prompt:
+      'Write `absorb(target, extra)` adding every element of `extra` into the `target` set **in place**. Return `None`.',
+    starter: 'def absorb(target, extra):\n    target = target | set(extra)\n',
+    tests: [
+      {
+        setup: "data = {'a'}",
+        call: "absorb(data, ['b', 'c'])\nsorted(data)",
+        expected: "['a', 'b', 'c']",
+      },
+      {
+        setup: 'data = set()',
+        call: 'absorb(data, [])\nsorted(data)',
+        expected: '[]',
+      },
+    ],
+    solution: 'def absorb(target, extra):\n    target.update(extra)\n',
+    explanation:
+      '`target = target | ...` builds a new set and rebinds the local name, so the caller sees nothing \u2014 the same trap as `items = sorted(items)` inside a function. `update` (or `|=`) mutates the existing object instead.',
+    hints: [
+      'The starter builds a new set and throws it away.',
+      'You need to change the object the caller is holding.',
+      '`target.update(extra)`, or `target |= set(extra)`.',
+    ],
+  },
+  {
+    id: 'set-025',
+    title: 'Count distinct per group',
+    topic: 'set',
+    difficulty: 'medium',
+    prompt:
+      'Write `distinct_per_user(events)` where each event is `(user, page)`, returning `{user: number_of_distinct_pages}`.',
+    starter: 'def distinct_per_user(events):\n    ...\n',
+    tests: [
+      {
+        call: "distinct_per_user([('a', '/x'), ('a', '/x'), ('a', '/y'), ('b', '/x')])",
+        expected: "{'a': 2, 'b': 1}",
+      },
+      { call: 'distinct_per_user([])', expected: '{}' },
+    ],
+    solution:
+      'def distinct_per_user(events):\n    seen = {}\n    for user, page in events:\n        seen.setdefault(user, set()).add(page)\n    return {user: len(pages) for user, pages in seen.items()}\n',
+    explanation:
+      'Counting distinct values per group needs a set per group \u2014 a plain counter would count repeats. This is exactly what `COUNT(DISTINCT ...) GROUP BY` does in SQL.',
+    hints: [
+      'A plain counter would count the duplicates too.',
+      'Each group needs its own set.',
+      '`seen.setdefault(user, set()).add(page)`, then take the lengths.',
+    ],
+  },
+  {
+    id: 'set-026',
+    title: 'Sets do not support indexing',
+    topic: 'set',
+    difficulty: 'easy',
+    prompt:
+      'Write `any_element(values)` returning one arbitrary element of the set, or `None` when empty.\n\nThe set must not be modified.',
+    starter: 'def any_element(values):\n    return values[0]\n',
+    tests: [
+      { call: "any_element({'a'})", expected: "'a'" },
+      { call: 'any_element(set())', expected: 'None' },
+      {
+        setup: "data = {'a'}",
+        call: 'any_element(data)\nsorted(data)',
+        expected: "['a']",
+      },
+    ],
+    solution: 'def any_element(values):\n    return next(iter(values), None)\n',
+    explanation:
+      '`values[0]` raises `TypeError` \u2014 sets are unordered and unsubscriptable. `values.pop()` would work but removes the element. `next(iter(values), None)` peeks without mutating and handles the empty case via the default.',
+    hints: [
+      'Sets are not subscriptable \u2014 `values[0]` raises.',
+      '`.pop()` would work but it removes the element.',
+      '`next(iter(values), None)` peeks without mutating.',
+    ],
+  },
+  {
+    id: 'set-027',
+    title: 'Which groups contain the value',
+    topic: 'set',
+    difficulty: 'medium',
+    prompt:
+      'Write `groups_with(groups, value)` where `groups` is `{name: [item, ...]}`, returning the sorted names whose group contains `value`.',
+    starter: 'def groups_with(groups, value):\n    ...\n',
+    tests: [
+      {
+        call: "groups_with({'a': [1, 2], 'b': [2, 3], 'c': [4]}, 2)",
+        expected: "['a', 'b']",
+      },
+      { call: "groups_with({'a': [1]}, 9)", expected: '[]' },
+      { call: 'groups_with({}, 1)', expected: '[]' },
+    ],
+    solution:
+      'def groups_with(groups, value):\n    return sorted(name for name, items in groups.items() if value in set(items))\n',
+    explanation:
+      'A straightforward filter over `.items()`. Wrapping each group in `set()` only pays off if you test many values against the same groups \u2014 for a single lookup, `value in items` on the list is equally fine and avoids the conversion.',
+    hints: [
+      'Filter the items of the dict on a membership test.',
+      'Collect the names, not the groups.',
+      'Wrap the whole generator in `sorted(...)`.',
+    ],
+  },
+  {
+    id: 'set-028',
+    title: 'Symmetric difference of many sets',
+    topic: 'set',
+    difficulty: 'hard',
+    prompt:
+      'Write `in_exactly_one(groups)` returning the sorted values that appear in exactly one of the lists.',
+    starter: 'def in_exactly_one(groups):\n    ...\n',
+    tests: [
+      { call: 'in_exactly_one([[1, 2], [2, 3], [3, 4]])', expected: '[1, 4]' },
+      { call: 'in_exactly_one([[1], [1]])', expected: '[]' },
+      { call: 'in_exactly_one([])', expected: '[]' },
+    ],
+    solution:
+      'def in_exactly_one(groups):\n    counts = {}\n    for group in groups:\n        for value in set(group):\n            counts[value] = counts.get(value, 0) + 1\n    return sorted(value for value, count in counts.items() if count == 1)\n',
+    explanation:
+      'Chaining `^` across many sets does *not* mean "in exactly one" \u2014 it means "in an odd number of them", so a value in three groups would wrongly survive. Counting group membership explicitly is the correct approach, and `set(group)` stops a duplicate inside one group counting twice.',
+    hints: [
+      'Chaining `^` gives "in an odd number of sets", which is not the same thing.',
+      'Count how many groups each value appears in.',
+      'Deduplicate within each group first, then keep the values with a count of 1.',
+    ],
+  },
+  {
+    id: 'set-029',
+    title: 'Set from a generator',
+    topic: 'set',
+    difficulty: 'easy',
+    prompt:
+      'Write `distinct_lengths(words)` returning the sorted distinct word lengths.',
+    starter: 'def distinct_lengths(words):\n    ...\n',
+    tests: [
+      { call: "distinct_lengths(['a', 'bb', 'cc', 'ddd'])", expected: '[1, 2, 3]' },
+      { call: 'distinct_lengths([])', expected: '[]' },
+    ],
+    solution: 'def distinct_lengths(words):\n    return sorted({len(word) for word in words})\n',
+    explanation:
+      'Deduplicating a *derived* value rather than the item itself. A set comprehension does the mapping and the deduplication in one pass; `sorted(set(map(len, words)))` is the equivalent functional form.',
+    hints: [
+      'You are deduplicating the lengths, not the words.',
+      'A set comprehension can transform and deduplicate at once.',
+      '`sorted({len(word) for word in words})`.',
+    ],
+  },
+  {
+    id: 'set-030',
+    title: 'Remove a whole set of values',
+    topic: 'set',
+    difficulty: 'medium',
+    prompt:
+      'Write `strip_stopwords(words, stopwords)` returning the list of words with stopwords removed, preserving order and duplicates.',
+    starter: 'def strip_stopwords(words, stopwords):\n    ...\n',
+    tests: [
+      {
+        call: "strip_stopwords(['the', 'cat', 'the', 'hat'], ['the'])",
+        expected: "['cat', 'hat']",
+      },
+      { call: "strip_stopwords([], ['a'])", expected: '[]' },
+      { call: "strip_stopwords(['a'], [])", expected: "['a']" },
+    ],
+    solution:
+      'def strip_stopwords(words, stopwords):\n    blocked = set(stopwords)\n    return [word for word in words if word not in blocked]\n',
+    explanation:
+      'Building the stopword set once outside the comprehension turns an O(n*m) scan into O(n). Filtering into a new list rather than converting the words to a set preserves both order and duplicates, which the first test checks.',
+    hints: [
+      'Converting `words` to a set would destroy order and duplicates.',
+      'Only the stopwords need to become a set.',
+      'Build it once outside the comprehension, not inside it.',
+    ],
+  },
+  {
+    id: 'set-031',
+    title: 'Pairs that sum to a target',
+    topic: 'set',
+    difficulty: 'hard',
+    prompt:
+      'Write `pairs_summing(numbers, target)` returning the sorted distinct `(low, high)` pairs of values that add to `target`.',
+    starter: 'def pairs_summing(numbers, target):\n    ...\n',
+    tests: [
+      { call: 'pairs_summing([1, 2, 3, 4], 5)', expected: '[(1, 4), (2, 3)]' },
+      { call: 'pairs_summing([1, 1, 4], 5)', expected: '[(1, 4)]' },
+      { call: 'pairs_summing([1], 5)', expected: '[]' },
+    ],
+    solution:
+      'def pairs_summing(numbers, target):\n    seen = set()\n    found = set()\n    for value in numbers:\n        partner = target - value\n        if partner in seen:\n            found.add((min(value, partner), max(value, partner)))\n        seen.add(value)\n    return sorted(found)\n',
+    explanation:
+      'One pass with a `seen` set finds the complements in O(n), and a second set of *canonically ordered* pairs deduplicates \u2014 which is why `[1, 1, 4]` reports `(1, 4)` only once. Sorting each pair before storing is what makes the deduplication work.',
+    hints: [
+      'For each value you know exactly which partner you need.',
+      'Keep a set of values already seen.',
+      'Store each pair in a canonical order so duplicates collapse.',
+    ],
+  },
+  {
+    id: 'set-032',
+    title: 'Sets in a boolean context',
+    topic: 'set',
+    difficulty: 'easy',
+    prompt:
+      'Write `describe(values)` returning `"empty"` for an empty set and `"has items"` otherwise.',
+    starter: 'def describe(values):\n    ...\n',
+    tests: [
+      { call: 'describe(set())', expected: "'empty'" },
+      { call: "describe({'a'})", expected: "'has items'" },
+      { call: 'describe({0})', expected: "'has items'" },
+    ],
+    solution:
+      "def describe(values):\n    return 'has items' if values else 'empty'\n",
+    explanation:
+      'An empty set is falsy and a non-empty one is truthy, so `if values` is the idiomatic emptiness test \u2014 no `len(values) == 0` needed. The third test guards against confusing the *set* being empty with its *contents* being falsy: `{0}` is truthy.',
+    hints: [
+      'You do not need `len()` for this.',
+      'An empty collection is falsy in Python.',
+      'Careful: `{0}` is a non-empty set, so it is truthy.',
+    ],
+  },
+  {
+    id: 'set-033',
+    title: 'Difference update in place',
+    topic: 'set',
+    difficulty: 'medium',
+    prompt:
+      'Write `revoke(granted, removed)` deleting every value in `removed` from the `granted` set **in place**, ignoring ones that are not there. Return `None`.',
+    starter: 'def revoke(granted, removed):\n    ...\n',
+    tests: [
+      {
+        setup: "data = {'read', 'write'}",
+        call: "revoke(data, ['write', 'admin'])\nsorted(data)",
+        expected: "['read']",
+      },
+      {
+        setup: "data = {'read'}",
+        call: 'revoke(data, [])\nsorted(data)',
+        expected: "['read']",
+      },
+    ],
+    solution:
+      'def revoke(granted, removed):\n    granted.difference_update(removed)\n',
+    explanation:
+      '`difference_update` (equivalently `-=`) removes in bulk and silently ignores values that were never present, so no per-item `discard` loop is needed. Like all the `_update` methods it takes any iterable, not just a set.',
+    hints: [
+      'A loop of `discard` calls works, but there is a bulk method.',
+      'It is the in-place version of the `-` operator.',
+      '`granted.difference_update(removed)`, or `granted -= set(removed)`.',
+    ],
+  },
+  {
+    id: 'set-034',
+    title: 'Jaccard similarity',
+    topic: 'set',
+    difficulty: 'hard',
+    prompt:
+      'Write `similarity(a, b)` returning the size of the intersection divided by the size of the union.\n\nTwo empty inputs score 1.0.',
+    starter: 'def similarity(a, b):\n    ...\n',
+    tests: [
+      { call: 'similarity([1, 2], [2, 3])', expected: '1 / 3' },
+      { call: 'similarity([1], [1])', expected: '1.0' },
+      { call: 'similarity([], [])', expected: '1.0' },
+      { call: 'similarity([1], [2])', expected: '0.0' },
+    ],
+    solution:
+      'def similarity(a, b):\n    left = set(a)\n    right = set(b)\n    union = left | right\n    if not union:\n        return 1.0\n    return len(left & right) / len(union)\n',
+    explanation:
+      'The Jaccard index, used everywhere from deduplication to recommendation. The empty-union guard prevents a `ZeroDivisionError`; defining two empty sets as identical is the usual convention.',
+    hints: [
+      'Intersection over union \u2014 both are single operators.',
+      'Compute the union once and reuse its length.',
+      'Guard the empty union before dividing.',
+    ],
+  },
+  {
+    id: 'set-035',
+    title: 'Deduplicate case-insensitively',
+    topic: 'set',
+    difficulty: 'medium',
+    prompt:
+      'Write `unique_ignoring_case(words)` keeping the first spelling of each word, ignoring case, preserving order.',
+    starter: 'def unique_ignoring_case(words):\n    ...\n',
+    tests: [
+      {
+        call: "unique_ignoring_case(['Ann', 'ann', 'Bob'])",
+        expected: "['Ann', 'Bob']",
+      },
+      { call: 'unique_ignoring_case([])', expected: '[]' },
+    ],
+    solution:
+      'def unique_ignoring_case(words):\n    seen = set()\n    result = []\n    for word in words:\n        key = word.lower()\n        if key not in seen:\n            seen.add(key)\n            result.append(word)\n    return result\n',
+    explanation:
+      'The set holds the normalised key while the result list keeps the original spelling \u2014 the same split you need whenever "equal" is defined by a transformation rather than by the value itself.',
+    hints: [
+      'What goes in the set is not what goes in the result.',
+      'Store the lowercase form as the key.',
+      'Append the original word so the first spelling survives.',
+    ],
+  },];

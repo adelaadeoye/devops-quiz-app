@@ -86,6 +86,12 @@ if (duplicates.length) {
   process.exit(1);
 }
 
+const badHints = challenges.filter((c) => (c.hints ?? []).length !== 3);
+if (badHints.length) {
+  for (const c of badHints) console.error(`${c.id}: has ${(c.hints ?? []).length} hints, needs 3`);
+  process.exit(1);
+}
+
 const result = spawnSync('python3', ['-c', PY], {
   input: JSON.stringify(challenges),
   encoding: 'utf8',

@@ -17,7 +17,11 @@ export const stringChallenges: Challenge[] = [
     solution: "def squash(text):\n    return ' '.join(text.split())\n",
     explanation:
       '`text.split()` with no argument is special: it splits on *any* run of whitespace and discards empty pieces, which handles tabs, newlines and leading/trailing padding in one step. `text.split(\' \')` behaves completely differently and would leave empty strings behind.',
-    hints: ['`split()` with no argument is not the same as `split(" ")`.'],
+    hints: [
+      'One call can handle tabs, newlines and the trimming all at once.',
+      '`split()` with no argument is not the same as `split(" ")`.',
+      "`' '.join(text.split())`.",
+    ],
   },
   {
     id: 'str-002',
@@ -35,7 +39,11 @@ export const stringChallenges: Challenge[] = [
       "def char_counts(text):\n    counts = {}\n    for char in text:\n        if char == ' ':\n            continue\n        counts[char] = counts.get(char, 0) + 1\n    return counts\n",
     explanation:
       'Strings are iterable character by character, so no `list()` conversion is needed. `Counter(text.replace(" ", ""))` is the one-liner, but building the dict manually shows you understand `get` with a default.',
-    hints: ['Strings iterate over characters.'],
+    hints: [
+      'Strings iterate over characters — no `list()` conversion needed.',
+      'Skip the spaces with a `continue` or an `if`.',
+      'Then it is the usual `counts.get(char, 0) + 1` loop.',
+    ],
   },
   {
     id: 'str-003',
@@ -55,7 +63,11 @@ export const stringChallenges: Challenge[] = [
       'def is_palindrome(text):\n    cleaned = [char.lower() for char in text if char.isalnum()]\n    return cleaned == cleaned[::-1]\n',
     explanation:
       '`[::-1]` is the reverse-slice idiom and works on any sequence. Cleaning first with `.isalnum()` keeps the comparison honest. Comparing a list against its reversed copy costs O(n) extra memory; a two-pointer walk is the O(1)-space follow-up an interviewer may ask for.',
-    hints: ['`str.isalnum()` filters punctuation.', '`seq[::-1]` reverses.'],
+    hints: [
+      'Clean the string first, then the comparison becomes trivial.',
+      '`str.isalnum()` filters punctuation, and `.lower()` handles the case.',
+      '`seq[::-1]` reverses — compare the cleaned list against its reverse.',
+    ],
   },
   {
     id: 'str-004',
@@ -74,7 +86,11 @@ export const stringChallenges: Challenge[] = [
       "def capitalise_words(text):\n    return ' '.join(word.capitalize() for word in text.split())\n",
     explanation:
       '`str.capitalize()` upper-cases the first character and lower-cases everything else, which is what the spec asks. The built-in `str.title()` looks similar but breaks on apostrophes, turning "don\'t" into "Don\'T" — a classic interview gotcha.',
-    hints: ['`str.capitalize()` and `str.title()` differ.'],
+    hints: [
+      'Work word by word rather than on the whole string.',
+      '`str.capitalize()` and `str.title()` differ — one lower-cases the rest.',
+      "`' '.join(word.capitalize() for word in text.split())`.",
+    ],
   },
   {
     id: 'str-005',
@@ -96,7 +112,11 @@ export const stringChallenges: Challenge[] = [
       "def parse_env(text):\n    result = {}\n    for line in text.splitlines():\n        line = line.strip()\n        if not line or line.startswith('#'):\n            continue\n        key, _, value = line.partition('=')\n        result[key] = value\n    return result\n",
     explanation:
       '`partition` splits on the **first** separator and always returns three parts, so a value containing `=` survives intact — `split("=")` would shred it. `splitlines()` beats `split("\\n")` because it also copes with `\\r\\n`.',
-    hints: ['`str.partition` splits once.', '`splitlines()` handles line endings.'],
+    hints: [
+      '`splitlines()` handles line endings better than `split(\'\\n\')`.',
+      '`split(\'=\')` would shred a value that contains `=`.',
+      '`str.partition` splits once and always returns three parts.',
+    ],
   },
   {
     id: 'str-006',
@@ -113,7 +133,11 @@ export const stringChallenges: Challenge[] = [
     solution: "def reverse_words(text):\n    return ' '.join(reversed(text.split()))\n",
     explanation:
       '`reversed()` returns an iterator, and `join` accepts any iterable, so nothing extra is materialised. `text.split()[::-1]` is equivalent and slightly more common in interviews.',
-    hints: ['Split, reverse the list, join.'],
+    hints: [
+      'The words themselves stay intact — only their order changes.',
+      'Split, reverse the list, join.',
+      "`' '.join(reversed(text.split()))`, or `text.split()[::-1]`.",
+    ],
   },
   {
     id: 'str-007',
@@ -132,7 +156,11 @@ export const stringChallenges: Challenge[] = [
       "def are_anagrams(a, b):\n    def normalise(text):\n        return sorted(text.lower().replace(' ', ''))\n\n    return normalise(a) == normalise(b)\n",
     explanation:
       'Sorting both strings gives an O(n log n) answer that is easy to defend. Counting characters with `Counter` is O(n) and is the optimisation to mention. Note that comparing *sets* would be wrong: "aab" and "abb" have identical character sets.',
-    hints: ['Sorted characters, or a character count.', 'Why is a set the wrong tool here?'],
+    hints: [
+      'Find a normalised form that both words share when they are anagrams.',
+      'Sorted characters, or a character count — either works.',
+      'Why is a set the wrong tool here? "aab" and "abb" have the same set.',
+    ],
   },
   {
     id: 'str-008',
@@ -152,7 +180,11 @@ export const stringChallenges: Challenge[] = [
       "def truncate(text, limit):\n    if len(text) <= limit:\n        return text\n    return text[: limit - 1] + '…'\n",
     explanation:
       'The `limit - 1` accounts for the ellipsis character so the result length is exactly `limit`. The `<=` in the guard matters: with `<`, a string of exactly `limit` characters would be needlessly truncated.',
-    hints: ['Reserve one character for the ellipsis.', 'Check `<=` versus `<`.'],
+    hints: [
+      'The result length must be exactly `limit`, ellipsis included.',
+      'Reserve one character for the ellipsis.',
+      'Check `<=` versus `<` in the guard, then `text[: limit - 1] + \'…\'`.',
+    ],
   },
   {
     id: 'str-009',
@@ -172,7 +204,11 @@ export const stringChallenges: Challenge[] = [
       'def drop_prefix(text, prefix):\n    if prefix and text.startswith(prefix):\n        return text[len(prefix) :]\n    return text\n',
     explanation:
       "The trap is `text.lstrip(prefix)`: `lstrip` treats its argument as a *set of characters*, so `'vvv'.lstrip('v')` returns `''`. Python 3.9 added `str.removeprefix()` which does exactly the right thing in one call.",
-    hints: ['`lstrip` does not do what you think.', 'Python 3.9 added a method for this.'],
+    hints: [
+      '`lstrip` does not do what you think — try `\'vvv\'.lstrip(\'v\')`.',
+      'Check `startswith` first, then slice past the prefix.',
+      'Python 3.9 added a method for this: `str.removeprefix`.',
+    ],
   },
   {
     id: 'str-010',
@@ -192,7 +228,11 @@ export const stringChallenges: Challenge[] = [
       "def humanise(items):\n    if not items:\n        return ''\n    if len(items) == 1:\n        return items[0]\n    return ', '.join(items[:-1]) + ' and ' + items[-1]\n",
     explanation:
       'Handling the 0- and 1-item cases up front keeps the general case to a single expression. `join` only accepts strings — passing a list of ints raises `TypeError: sequence item 0: expected str instance`.',
-    hints: ['Special-case the short inputs first.'],
+    hints: [
+      'Special-case the short inputs first — 0 and 1 items.',
+      'For the rest, everything but the last joins normally.',
+      "`', '.join(items[:-1]) + ' and ' + items[-1]`.",
+    ],
   },
   {
     id: 'str-011',
@@ -211,7 +251,11 @@ export const stringChallenges: Challenge[] = [
       "def longest_word(text):\n    return max(text.split(), key=len, default='')\n",
     explanation:
       '`max` with `key=len` returns the first maximal element, which satisfies the tie-break rule for free. `default=` covers the empty case; without it `max` raises `ValueError` on an empty sequence.',
-    hints: ['`max` accepts `key` and `default`.'],
+    hints: [
+      'A manual loop tracking the best word works, but there is a built-in.',
+      '`max` accepts `key` and `default`.',
+      "`max(text.split(), key=len, default='')` — `max` keeps the first maximal element.",
+    ],
   },
   {
     id: 'str-012',
@@ -231,7 +275,11 @@ export const stringChallenges: Challenge[] = [
       "def slugify(title):\n    words = []\n    for word in title.lower().split():\n        cleaned = ''.join(char for char in word if char.isalnum())\n        if cleaned:\n            words.append(cleaned)\n    return '-'.join(words)\n",
     explanation:
       'Splitting first and cleaning per word keeps punctuation from producing empty segments like `hello--world`. The `if cleaned` check drops words that were pure punctuation, which is what makes the `"!!!"` case return an empty string rather than a stray hyphen.',
-    hints: ['Clean each word, then drop the empty ones.'],
+    hints: [
+      'Split into words first so punctuation cannot create empty segments.',
+      'Clean each word, then drop the empty ones.',
+      "Keep only `char.isalnum()`, skip words that clean to '', then join with '-'.",
+    ],
   },
   {
     id: 'str-013',
@@ -251,7 +299,11 @@ export const stringChallenges: Challenge[] = [
       'def top_word(text):\n    counts = {}\n    for word in text.lower().split():\n        counts[word] = counts.get(word, 0) + 1\n    if not counts:\n        return None\n    return min(counts, key=lambda word: (-counts[word], word))\n',
     explanation:
       '`min` with a tuple key of `(-count, word)` gives "highest count, then alphabetically first" in a single pass over the dict. Reaching for `Counter.most_common(1)` would be shorter but its tie-break is insertion order, not alphabetical — which fails the second test.',
-    hints: ['Count first, then pick with a tuple key.', 'Why is `most_common` not enough here?'],
+    hints: [
+      'Count first, then pick a winner in a second step.',
+      'Why is `most_common` not enough here? Its tie-break is insertion order.',
+      '`min(counts, key=lambda w: (-counts[w], w))` gives highest count, then alphabetical.',
+    ],
   },
   {
     id: 'str-014',
@@ -270,7 +322,11 @@ export const stringChallenges: Challenge[] = [
       "def mask(token):\n    if len(token) <= 4:\n        return token\n    return '*' * (len(token) - 4) + token[-4:]\n",
     explanation:
       '`"*" * n` repeats a string, and `token[-4:]` takes the last four characters safely even on short input. Without the length guard, `len(token) - 4` goes negative and `"*" * -1` silently produces an empty string — a bug that hides itself.',
-    hints: ['Negative repetition counts give an empty string.'],
+    hints: [
+      'Negative repetition counts give an empty string, silently.',
+      'So the short-token guard is not optional.',
+      "`'*' * (len(token) - 4) + token[-4:]`.",
+    ],
   },
   {
     id: 'str-015',
@@ -289,7 +345,11 @@ export const stringChallenges: Challenge[] = [
       "def split_tags(text):\n    normalised = text.replace(';', ',')\n    return [tag.strip() for tag in normalised.split(',') if tag.strip()]\n",
     explanation:
       'Normalising one separator into the other avoids reaching for `re.split`. The `if tag.strip()` filter removes the empty strings that consecutive separators produce — `"a,,b".split(",")` yields `["a", "", "b"]`.',
-    hints: ['Turn one separator into the other first.'],
+    hints: [
+      'You do not need a regex for this.',
+      'Turn one separator into the other first.',
+      'Then strip each piece and drop the ones that are empty.',
+    ],
   },
   {
     id: 'str-016',
@@ -308,7 +368,11 @@ export const stringChallenges: Challenge[] = [
       "def pad_row(values, width):\n    return ' | '.join(value.ljust(width) for value in values)\n",
     explanation:
       '`str.ljust(width)` pads on the right and, importantly, never truncates — an over-long value is returned untouched, which is exactly the required behaviour. `rjust` and `center` are the other two variants, and f-strings offer the same via `f"{value:<3}"`.',
-    hints: ['`str.ljust` never truncates.'],
+    hints: [
+      'Over-long values must survive untouched — that rules out slicing.',
+      '`str.ljust` never truncates.',
+      "`' | '.join(value.ljust(width) for value in values)`.",
+    ],
   },
   {
     id: 'str-017',
@@ -327,7 +391,11 @@ export const stringChallenges: Challenge[] = [
       'def replace_at(text, index, char):\n    if not 0 <= index < len(text):\n        return text\n    return text[:index] + char + text[index + 1 :]\n',
     explanation:
       '`text[1] = "X"` raises `TypeError: str object does not support item assignment`, so you rebuild the string from two slices. The chained comparison `0 <= index < len(text)` rejects negative indices too, which plain indexing would silently accept as counting from the end.',
-    hints: ['You cannot assign into a string.', 'Do not forget negative indices.'],
+    hints: [
+      'You cannot assign into a string — rebuild it from pieces.',
+      'Two slices and the new character concatenated.',
+      'Do not forget negative indices: `if not 0 <= index < len(text)`.',
+    ],
   },
   {
     id: 'str-018',
@@ -344,7 +412,11 @@ export const stringChallenges: Challenge[] = [
     solution: 'def repeat_join(word, times, sep):\n    return sep.join([word] * times)\n',
     explanation:
       'Repeated `result += piece` in a loop creates a new string every iteration, giving quadratic behaviour on large inputs. `join` walks the sequence once, sizes the buffer, and copies — this is the canonical "why you should use join" answer.',
-    hints: ['Why is `+=` in a loop a bad idea for strings?'],
+    hints: [
+      'Why is `+=` in a loop a bad idea for strings? They are immutable.',
+      'Build the pieces first, then join them once.',
+      '`sep.join([word] * times)`.',
+    ],
   },
   {
     id: 'str-019',
@@ -361,7 +433,11 @@ export const stringChallenges: Challenge[] = [
     solution: 'def sort_names(names):\n    return sorted(names, key=str.lower)\n',
     explanation:
       'Plain `sorted` compares by code point, so every uppercase letter sorts before every lowercase one and "Zoe" would land before "ann". Passing `key=str.lower` compares folded copies while returning the originals. `str.casefold` is the more aggressive variant for non-English text.',
-    hints: ['Pass a `key`, do not mutate the values.'],
+    hints: [
+      'Plain `sorted` puts every uppercase letter before every lowercase one.',
+      'Pass a `key`, do not mutate the values.',
+      '`sorted(names, key=str.lower)`.',
+    ],
   },
   {
     id: 'str-020',
@@ -381,7 +457,11 @@ export const stringChallenges: Challenge[] = [
       'def numbers_in(text):\n    return [int(token) for token in text.split() if token.isdigit()]\n',
     explanation:
       '`str.isdigit()` is true only for pure digit strings, so `"3.5"` and `"-4"` are correctly rejected. Beware that `isdigit` also accepts superscripts like `"²"`; `str.isdecimal()` is the stricter check when input may be non-ASCII.',
-    hints: ['`str.isdigit()` filters before converting.'],
+    hints: [
+      'Split into tokens, then decide which ones are numbers.',
+      '`str.isdigit()` filters before converting, so `int()` never raises.',
+      "`[int(t) for t in text.split() if t.isdigit()]` — it rejects '3.5' and '-4'.",
+    ],
   },
   {
     id: 'str-021',
@@ -401,7 +481,11 @@ export const stringChallenges: Challenge[] = [
       "def common_prefix(words):\n    if not words:\n        return ''\n    shortest = min(words, key=len)\n    for index, char in enumerate(shortest):\n        if any(word[index] != char for word in words):\n            return shortest[:index]\n    return shortest\n",
     explanation:
       'The answer can never be longer than the shortest word, so scanning that one bounds the work and removes any index-out-of-range risk. A neat alternative: `os.path.commonprefix(words)` does this for arbitrary sequences, despite living in the path module.',
-    hints: ['The answer cannot exceed the shortest word.'],
+    hints: [
+      'The answer cannot exceed the shortest word — scan that one.',
+      'At each position, check whether every word agrees.',
+      'Return `shortest[:index]` at the first disagreement.',
+    ],
   },
   {
     id: 'str-022',
@@ -422,7 +506,11 @@ export const stringChallenges: Challenge[] = [
       "def is_balanced(text):\n    pairs = {')': '(', ']': '[', '}': '{'}\n    stack = []\n    for char in text:\n        if char in pairs.values():\n            stack.append(char)\n        elif char in pairs:\n            if not stack or stack.pop() != pairs[char]:\n                return False\n    return not stack\n",
     explanation:
       'A list used as a stack is the standard solution. The two failure modes are a closer with nothing (or the wrong thing) on top, and leftover openers at the end — the final `return not stack` catches the second. Counting brackets instead of stacking them fails on `([)]`.',
-    hints: ['Use a list as a stack.', 'Do not forget to check the stack is empty at the end.'],
+    hints: [
+      'Counting brackets is not enough — it accepts `([)]`.',
+      'Use a list as a stack: push openers, pop on closers.',
+      'Do not forget to check the stack is empty at the end.',
+    ],
   },
   {
     id: 'str-023',
@@ -441,7 +529,11 @@ export const stringChallenges: Challenge[] = [
       "def group_digits(digits, size):\n    return ' '.join(digits[i : i + size] for i in range(0, len(digits), size))\n",
     explanation:
       'Identical to chunking a list — strings are sequences too, so the same `range(0, len, step)` plus slicing idiom applies, and the final short group needs no special handling.',
-    hints: ['Same idea as chunking a list.'],
+    hints: [
+      'Same idea as chunking a list — strings are sequences too.',
+      'Step a `range` by `size` and slice at each index.',
+      "`' '.join(digits[i : i + size] for i in range(0, len(digits), size))`.",
+    ],
   },
   {
     id: 'str-024',
@@ -459,7 +551,11 @@ export const stringChallenges: Challenge[] = [
       "def strip_vowels(text):\n    vowels = set('aeiou')\n    return ''.join(char for char in text if char.lower() not in vowels)\n",
     explanation:
       'A set gives O(1) membership tests, and `set(\'aeiou\')` is a compact way to build one from a string. Lowercasing only the character being tested preserves the original casing of everything you keep.',
-    hints: ['Build a set of vowels once, outside the loop.'],
+    hints: [
+      'Build a set of vowels once, outside the loop.',
+      'Lower-case only the character you are testing, so the original casing survives.',
+      "`''.join(c for c in text if c.lower() not in vowels)`.",
+    ],
   },
   {
     id: 'str-025',
@@ -478,6 +574,359 @@ export const stringChallenges: Challenge[] = [
       "def wrap(text, width):\n    lines = []\n    current = []\n    length = 0\n    for word in text.split():\n        extra = len(word) if not current else len(word) + 1\n        if length + extra > width:\n            lines.append(' '.join(current))\n            current = [word]\n            length = len(word)\n        else:\n            current.append(word)\n            length += extra\n    if current:\n        lines.append(' '.join(current))\n    return lines\n",
     explanation:
       'The subtle part is accounting for the separating space only when the line is not empty — forgetting it produces lines one character too long. Tracking `length` avoids re-joining the buffer on every word. `textwrap.wrap` in the stdlib is the production answer.',
-    hints: ['Remember to count the space between words.', 'Do not forget the final partial line.'],
+    hints: [
+      'Greedy means: add the next word if it still fits, otherwise start a line.',
+      'Remember to count the space between words — but not before the first one.',
+      'Do not forget the final partial line after the loop ends.',
+    ],
+  },  {
+    id: 'str-026',
+    title: 'Count vowels',
+    topic: 'str',
+    difficulty: 'easy',
+    prompt: 'Write `count_vowels(text)` counting `a e i o u` in either case.',
+    starter: 'def count_vowels(text):\n    ...\n',
+    tests: [
+      { call: "count_vowels('Beautiful')", expected: '5' },
+      { call: "count_vowels('xyz')", expected: '0' },
+      { call: "count_vowels('')", expected: '0' },
+    ],
+    solution:
+      "def count_vowels(text):\n    vowels = set('aeiou')\n    return sum(1 for char in text.lower() if char in vowels)\n",
+    explanation:
+      'Lower-casing once up front is cheaper than calling `.lower()` per character, and the set makes each membership test O(1). The `sum(1 for ...)` shape is the general counting idiom.',
+    hints: [
+      'Normalise the case before you start counting.',
+      'A set of vowels makes each test O(1).',
+      '`sum(1 for char in text.lower() if char in vowels)`.',
+    ],
   },
-];
+  {
+    id: 'str-027',
+    title: 'Repeat each character',
+    topic: 'str',
+    difficulty: 'easy',
+    prompt: 'Write `stretch(text, times)` repeating every character `times` times.',
+    starter: 'def stretch(text, times):\n    ...\n',
+    tests: [
+      { call: "stretch('abc', 2)", expected: "'aabbcc'" },
+      { call: "stretch('a', 1)", expected: "'a'" },
+      { call: "stretch('ab', 0)", expected: "''" },
+      { call: "stretch('', 3)", expected: "''" },
+    ],
+    solution:
+      "def stretch(text, times):\n    return ''.join(char * times for char in text)\n",
+    explanation:
+      '`char * times` repeats a single character, and joining the results assembles the answer in one pass. Note `text * times` would repeat the whole string instead \u2014 `"ababab"` rather than `"aabbcc"`.',
+    hints: [
+      '`text * times` repeats the whole string, which is not what you want.',
+      'Repeat each character individually.',
+      "`''.join(char * times for char in text)`.",
+    ],
+  },
+  {
+    id: 'str-028',
+    title: 'Find all occurrences',
+    topic: 'str',
+    difficulty: 'medium',
+    prompt:
+      'Write `find_all(text, needle)` returning every start index where `needle` occurs, including overlaps.\n\nAssume `needle` is non-empty.',
+    starter: 'def find_all(text, needle):\n    ...\n',
+    tests: [
+      { call: "find_all('aaaa', 'aa')", expected: '[0, 1, 2]' },
+      { call: "find_all('abc', 'd')", expected: '[]' },
+      { call: "find_all('abcabc', 'abc')", expected: '[0, 3]' },
+    ],
+    solution:
+      'def find_all(text, needle):\n    result = []\n    start = text.find(needle)\n    while start != -1:\n        result.append(start)\n        start = text.find(needle, start + 1)\n    return result\n',
+    explanation:
+      '`str.find` takes a start offset, so resuming from `start + 1` (not `start + len(needle)`) is what makes overlapping matches appear. `str.count` would report only 2 for `"aaaa"`/`"aa"` because it skips past each match.',
+    hints: [
+      '`str.find` accepts a starting offset.',
+      'Loop until it returns -1.',
+      'Resume from `start + 1`, not past the whole match, so overlaps are found.',
+    ],
+  },
+  {
+    id: 'str-029',
+    title: 'Caesar cipher',
+    topic: 'str',
+    difficulty: 'hard',
+    prompt:
+      'Write `shift(text, n)` rotating each lowercase letter `n` places through the alphabet, wrapping around.\n\nLeave every other character untouched.',
+    starter: 'def shift(text, n):\n    ...\n',
+    tests: [
+      { call: "shift('abc', 1)", expected: "'bcd'" },
+      { call: "shift('xyz', 3)", expected: "'abc'" },
+      { call: "shift('a-b', 1)", expected: "'b-c'" },
+      { call: "shift('abc', 0)", expected: "'abc'" },
+    ],
+    solution:
+      "def shift(text, n):\n    result = []\n    for char in text:\n        if 'a' <= char <= 'z':\n            result.append(chr((ord(char) - ord('a') + n) % 26 + ord('a')))\n        else:\n            result.append(char)\n    return ''.join(result)\n",
+    explanation:
+      'Normalise to 0\u201325 by subtracting `ord("a")`, do the modular arithmetic, then add the base back. Doing `% 26` before re-adding the base is essential \u2014 applying it afterwards would wrap into the wrong character range.',
+    hints: [
+      '`ord()` and `chr()` convert between characters and code points.',
+      'Subtract the base first so you are working with 0\u201325.',
+      'Apply `% 26` before adding the base back.',
+    ],
+  },
+  {
+    id: 'str-030',
+    title: 'Strip both affixes',
+    topic: 'str',
+    difficulty: 'medium',
+    prompt:
+      'Write `unquote(text)` removing one leading and one trailing double quote, but only when both are present.',
+    starter: 'def unquote(text):\n    ...\n',
+    tests: [
+      { call: 'unquote(\'"hi"\')', expected: "'hi'" },
+      { call: "unquote('hi')", expected: "'hi'" },
+      { call: 'unquote(\'"hi\')', expected: '\'"hi\'' },
+      { call: 'unquote(\'"\')', expected: '\'"\'' },
+    ],
+    solution:
+      'def unquote(text):\n    if len(text) >= 2 and text[0] == \'"\' and text[-1] == \'"\':\n        return text[1:-1]\n    return text\n',
+    explanation:
+      'The `len(text) >= 2` guard is the interesting part: without it, a single `"` would satisfy both `text[0]` and `text[-1]` (they are the same character) and get stripped into an empty string. `text.strip(\'"\')` is also wrong here \u2014 it removes any number of quotes from both ends.',
+    hints: [
+      'Both ends must be checked before removing anything.',
+      '`strip(\'"\')` is wrong \u2014 it removes any number of quotes.',
+      'Watch the single-character case: `text[0]` and `text[-1]` are the same character.',
+    ],
+  },
+  {
+    id: 'str-031',
+    title: 'Count words',
+    topic: 'str',
+    difficulty: 'easy',
+    prompt:
+      'Write `word_count(text)` counting whitespace-separated words.\n\nAny amount of surrounding or repeated whitespace is allowed.',
+    starter: 'def word_count(text):\n    ...\n',
+    tests: [
+      { call: "word_count('  one   two ')", expected: '2' },
+      { call: "word_count('')", expected: '0' },
+      { call: "word_count('   ')", expected: '0' },
+      { call: "word_count('one')", expected: '1' },
+    ],
+    solution: 'def word_count(text):\n    return len(text.split())\n',
+    explanation:
+      '`split()` with no argument discards empty pieces, so runs of whitespace and padded ends are handled automatically \u2014 and an all-whitespace string yields `[]`, giving 0. `text.split(" ")` would count empty strings as words.',
+    hints: [
+      'One call does all the normalising for you.',
+      '`split()` with no argument ignores repeated whitespace.',
+      '`len(text.split())`.',
+    ],
+  },
+  {
+    id: 'str-032',
+    title: 'Reverse each word',
+    topic: 'str',
+    difficulty: 'easy',
+    prompt:
+      'Write `flip_words(text)` reversing the letters of each word while keeping the word order.',
+    starter: 'def flip_words(text):\n    ...\n',
+    tests: [
+      { call: "flip_words('abc def')", expected: "'cba fed'" },
+      { call: "flip_words('a')", expected: "'a'" },
+      { call: "flip_words('')", expected: "''" },
+    ],
+    solution:
+      "def flip_words(text):\n    return ' '.join(word[::-1] for word in text.split())\n",
+    explanation:
+      'The mirror image of reversing word order: here the list order is preserved and each element is reversed instead. `[::-1]` works on strings because they are sequences.',
+    hints: [
+      'This is the opposite of reversing the word order.',
+      'Split, reverse each piece, join back.',
+      "`' '.join(word[::-1] for word in text.split())`.",
+    ],
+  },
+  {
+    id: 'str-033',
+    title: 'Check a suffix list',
+    topic: 'str',
+    difficulty: 'easy',
+    prompt:
+      'Write `is_image(name, suffixes)` returning `True` when the filename ends with any of the given suffixes, case-insensitively.',
+    starter: 'def is_image(name, suffixes):\n    ...\n',
+    tests: [
+      { call: "is_image('photo.PNG', ['.png', '.jpg'])", expected: 'True' },
+      { call: "is_image('notes.txt', ['.png'])", expected: 'False' },
+      { call: "is_image('a.png', [])", expected: 'False' },
+    ],
+    solution:
+      'def is_image(name, suffixes):\n    return name.lower().endswith(tuple(suffixes))\n',
+    explanation:
+      '`str.endswith` accepts a **tuple** of candidates and returns `True` if any matches \u2014 but it must be a tuple, not a list, or you get `TypeError`. An empty tuple correctly returns `False`.',
+    hints: [
+      '`endswith` can check several candidates at once.',
+      'But it insists on a tuple, not a list.',
+      '`name.lower().endswith(tuple(suffixes))`.',
+    ],
+  },
+  {
+    id: 'str-034',
+    title: 'Centre a heading',
+    topic: 'str',
+    difficulty: 'easy',
+    prompt:
+      'Write `banner(text, width, fill)` centring the text within `width`, padded with the `fill` character.',
+    starter: 'def banner(text, width, fill):\n    ...\n',
+    tests: [
+      { call: "banner('hi', 6, '-')", expected: "'--hi--'" },
+      { call: "banner('hi', 5, '-')", expected: "'--hi-'" },
+      { call: "banner('toolong', 3, '-')", expected: "'toolong'" },
+    ],
+    solution:
+      'def banner(text, width, fill):\n    return text.center(width, fill)\n',
+    explanation:
+      '`str.center(width, fillchar)` handles the padding arithmetic and never truncates an over-long string. When the padding is odd the extra character goes on the left, which is the kind of detail worth checking rather than assuming.',
+    hints: [
+      'There is a string method for exactly this.',
+      'It is the sibling of `ljust` and `rjust`.',
+      '`text.center(width, fill)`.',
+    ],
+  },
+  {
+    id: 'str-035',
+    title: 'Split once from the right',
+    topic: 'str',
+    difficulty: 'medium',
+    prompt:
+      'Write `split_extension(name)` returning `(stem, extension)` split on the **last** dot.\n\nReturn `(name, "")` when there is no dot.',
+    starter: 'def split_extension(name):\n    ...\n',
+    tests: [
+      { call: "split_extension('archive.tar.gz')", expected: "('archive.tar', 'gz')" },
+      { call: "split_extension('README')", expected: "('README', '')" },
+      { call: "split_extension('.hidden')", expected: "('', 'hidden')" },
+    ],
+    solution:
+      "def split_extension(name):\n    stem, separator, extension = name.rpartition('.')\n    if not separator:\n        return name, ''\n    return stem, extension\n",
+    explanation:
+      '`rpartition` splits on the last occurrence and always returns three parts, with the separator itself as the middle one \u2014 testing that is how you distinguish "no dot" from "empty stem". When there is no match, `rpartition` puts the whole string in the *third* slot, which is why the no-dot case is handled explicitly.',
+    hints: [
+      'You want the last dot, not the first.',
+      '`rpartition` splits once from the right and returns three parts.',
+      'The middle part is the separator \u2014 check it to detect "no dot at all".',
+    ],
+  },
+  {
+    id: 'str-036',
+    title: 'Normalise line endings',
+    topic: 'str',
+    difficulty: 'medium',
+    prompt:
+      'Write `normalise(text)` converting Windows and old-Mac line endings to plain `\\n`.',
+    starter: 'def normalise(text):\n    ...\n',
+    tests: [
+      { call: "normalise('a\\r\\nb')", expected: "'a\\nb'" },
+      { call: "normalise('a\\rb')", expected: "'a\\nb'" },
+      { call: "normalise('a\\nb')", expected: "'a\\nb'" },
+      { call: "normalise('')", expected: "''" },
+    ],
+    solution:
+      "def normalise(text):\n    return text.replace('\\r\\n', '\\n').replace('\\r', '\\n')\n",
+    explanation:
+      'Order matters enormously: replacing `\\r` first would turn `\\r\\n` into `\\n\\n`, silently doubling every line break. Always handle the longer sequence before the shorter one when chaining replacements.',
+    hints: [
+      'Two replacements are needed, and the order matters.',
+      'Doing `\\r` first would turn `\\r\\n` into two newlines.',
+      'Replace the two-character sequence first.',
+    ],
+  },
+  {
+    id: 'str-037',
+    title: 'Title from a slug',
+    topic: 'str',
+    difficulty: 'easy',
+    prompt:
+      'Write `unslug(slug)` turning `"hello-world"` into `"Hello World"`.',
+    starter: 'def unslug(slug):\n    ...\n',
+    tests: [
+      { call: "unslug('hello-world')", expected: "'Hello World'" },
+      { call: "unslug('one')", expected: "'One'" },
+      { call: "unslug('')", expected: "''" },
+    ],
+    solution:
+      "def unslug(slug):\n    return ' '.join(word.capitalize() for word in slug.split('-') if word)\n",
+    explanation:
+      'Here `split(\'-\')` with an explicit separator is correct, unlike whitespace splitting. The `if word` filter drops the empty strings that a leading, trailing or doubled hyphen would otherwise produce \u2014 including for the empty input.',
+    hints: [
+      'Split on the hyphen explicitly this time.',
+      'Capitalise each piece, then join with spaces.',
+      'Filter out empty pieces so doubled hyphens do not add blanks.',
+    ],
+  },
+  {
+    id: 'str-038',
+    title: 'Longest common suffix',
+    topic: 'str',
+    difficulty: 'hard',
+    prompt:
+      'Write `common_suffix(words)` returning the longest string every word ends with.\n\nReturn `""` when there is none or the list is empty.',
+    starter: 'def common_suffix(words):\n    ...\n',
+    tests: [
+      { call: "common_suffix(['running', 'jumping'])", expected: "'ing'" },
+      { call: "common_suffix(['abc', 'xyz'])", expected: "''" },
+      { call: "common_suffix(['same', 'same'])", expected: "'same'" },
+      { call: 'common_suffix([])', expected: "''" },
+    ],
+    solution:
+      "def common_suffix(words):\n    if not words:\n        return ''\n    reversed_words = [word[::-1] for word in words]\n    shortest = min(reversed_words, key=len)\n    for index, char in enumerate(shortest):\n        if any(word[index] != char for word in reversed_words):\n            return shortest[:index][::-1]\n    return shortest[::-1]\n",
+    explanation:
+      'Reversing every word turns the suffix problem into the prefix problem you have already solved, then one final reverse converts the answer back. Reframing a problem into one you can already solve is a genuinely useful interview move.',
+    hints: [
+      'You already know how to find a common *prefix*.',
+      'Reverse everything and the problem becomes that one.',
+      'Remember to reverse the answer back at the end.',
+    ],
+  },
+  {
+    id: 'str-039',
+    title: 'Validate a simple identifier',
+    topic: 'str',
+    difficulty: 'medium',
+    prompt:
+      'Write `is_identifier(text)` returning `True` when the string starts with a letter or underscore and contains only letters, digits and underscores.\n\nAn empty string is invalid.',
+    starter: 'def is_identifier(text):\n    ...\n',
+    tests: [
+      { call: "is_identifier('name_1')", expected: 'True' },
+      { call: "is_identifier('_x')", expected: 'True' },
+      { call: "is_identifier('1x')", expected: 'False' },
+      { call: "is_identifier('')", expected: 'False' },
+      { call: "is_identifier('a-b')", expected: 'False' },
+    ],
+    solution:
+      "def is_identifier(text):\n    if not text:\n        return False\n    if not (text[0].isalpha() or text[0] == '_'):\n        return False\n    return all(char.isalnum() or char == '_' for char in text)\n",
+    explanation:
+      'Three separate rules, checked in order so the later ones can assume the string is non-empty. Python actually ships `str.isidentifier()`, which additionally knows about keywords and Unicode \u2014 worth mentioning even when writing it by hand.',
+    hints: [
+      'Three rules: non-empty, valid first character, valid remaining characters.',
+      'Check them in that order so indexing is always safe.',
+      "`all(char.isalnum() or char == '_' for char in text)` covers the last one.",
+    ],
+  },
+  {
+    id: 'str-040',
+    title: 'Compress repeated characters',
+    topic: 'str',
+    difficulty: 'hard',
+    prompt:
+      'Write `compress(text)` turning `"aaabbc"` into `"a3b2c1"`.\n\nAn empty string stays empty.',
+    starter: 'def compress(text):\n    ...\n',
+    tests: [
+      { call: "compress('aaabbc')", expected: "'a3b2c1'" },
+      { call: "compress('abc')", expected: "'a1b1c1'" },
+      { call: "compress('')", expected: "''" },
+      { call: "compress('aab a')", expected: "'a2b1 1a1'" },
+    ],
+    solution:
+      "def compress(text):\n    if not text:\n        return ''\n    parts = []\n    current = text[0]\n    count = 1\n    for char in text[1:]:\n        if char == current:\n            count += 1\n        else:\n            parts.append(f'{current}{count}')\n            current = char\n            count = 1\n    parts.append(f'{current}{count}')\n    return ''.join(parts)\n",
+    explanation:
+      'Run-length encoding by hand. The final `append` after the loop is essential \u2014 the last run is never flushed by the loop body itself. `itertools.groupby` collapses this to a one-liner, but doing it manually is the version interviewers ask for.',
+    hints: [
+      'Track the current character and how many times you have seen it.',
+      'Flush a run only when the character changes.',
+      'The last run needs flushing after the loop ends.',
+    ],
+  },];
