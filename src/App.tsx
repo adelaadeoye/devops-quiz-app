@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { Suspense, lazy, useCallback, useState } from 'react';
 import type { AttemptState, Question, QuizConfig } from './types';
 import { getTrack, tracks } from './data';
 import { pickQuestions, shuffle, withShuffledOptions } from './lib/quiz';
@@ -6,6 +6,8 @@ import { useLocalStorage } from './lib/useLocalStorage';
 import Home from './components/Home';
 import Quiz from './components/Quiz';
 import Results from './components/Results';
+
+const PythonLab = lazy(() => import('./components/PythonLab'));
 
 interface Session {
   stage: 'quiz' | 'results';
@@ -30,6 +32,7 @@ function newAttempt(config: QuizConfig, questions: Question[]): AttemptState {
 export default function App() {
   const [session, setSession, clearSession] = useLocalStorage<Session | null>(STORAGE_KEY, null);
   const [atHome, setAtHome] = useState(true);
+  const [inPythonLab, setInPythonLab] = useState(false);
 
   const start = useCallback(
     (config: QuizConfig) => {
@@ -59,6 +62,25 @@ export default function App() {
     window.scrollTo({ top: 0 });
   }, []);
 
+  if (inPythonLab) {
+    return (
+      <Shell>
+        <Suspense
+          fallback={
+            <p className="px-4 py-20 text-center text-sm text-slate-500">Loading the editor…</p>
+          }
+        >
+          <PythonLab
+            onExit={() => {
+              setInPythonLab(false);
+              window.scrollTo({ top: 0 });
+            }}
+          />
+        </Suspense>
+      </Shell>
+    );
+  }
+
   if (atHome || !session) {
     const savedTrack = session ? getTrack(session.attempt.config.trackId) : undefined;
     const resumable = Boolean(session && session.stage === 'quiz');
@@ -76,6 +98,10 @@ export default function App() {
           onResume={() => setAtHome(false)}
           onDiscard={() => clearSession()}
           onStart={start}
+          onOpenPythonLab={() => {
+            setInPythonLab(true);
+            window.scrollTo({ top: 0 });
+          }}
         />
       </Shell>
     );

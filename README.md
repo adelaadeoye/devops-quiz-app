@@ -9,10 +9,17 @@ Practice quiz app with two role tracks, modelled on [kcna-quiz-app](https://gith
 
 Every question has a written explanation. Multi-select questions are labelled with how many options to pick.
 
+Plus a **Python data structures lab**: 155 coding challenges on `list`, `dict`, `set`, `tuple`, `str`
+and `collections`/`itertools`, each with a starter snippet, a test suite, a reference solution and an
+explanation. Your code runs against real CPython in the browser via [Pyodide](https://pyodide.org)
+(WebAssembly) — nothing is uploaded and no backend is involved.
+
 ## Features
 
 - **Practice mode** — check each answer immediately and read the explanation as you go.
 - **Exam mode** — answers stay hidden until you submit the whole paper.
+- **Python lab** — CodeMirror editor, per-test pass/fail with expected vs. actual, staged hints, and
+  captured `print()` output. Filter by topic and difficulty; solved challenges and code drafts persist.
 - Topic filters, quiz length selection, and optional answer-option shuffling.
 - Question navigator with answered/flagged/correct state, and flag-for-review.
 - Results with per-topic breakdown, a filterable review of every question, and a "retry missed" run.
@@ -22,10 +29,15 @@ Every question has a written explanation. Multi-select questions are labelled wi
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
-npm run build    # production build into dist/
-npm run preview  # serve the production build locally
+npm run dev               # http://localhost:5173
+npm run build             # production build into dist/
+npm run preview           # serve the production build locally
+npm run verify:challenges # run every Python reference solution against its own tests
 ```
+
+`verify:challenges` needs a local `python3`. It asserts that each reference solution passes all of its
+test cases and that each starter snippet does *not* — run it after editing anything in
+`src/data/python`.
 
 ## Deploying to GitHub Pages
 
@@ -64,6 +76,33 @@ Each entry follows the `Question` type in [src/types.ts](src/types.ts):
 
 Add the question to the relevant topic file; the track picks it up automatically. To add a new topic,
 create a file exporting a `Question[]` and spread it into the track in `src/data/index.ts`.
+
+## Adding Python challenges
+
+Challenges live in [src/data/python](src/data/python), one file per topic, and follow the `Challenge`
+type in [src/types.ts](src/types.ts):
+
+```ts
+{
+  id: 'list-031',
+  title: 'Chunk a list',
+  topic: 'list',                  // list | dict | set | tuple | str | collections
+  difficulty: 'medium',
+  prompt: 'Write `chunk(items, size)` that ...',
+  starter: 'def chunk(items, size):\n    ...\n',
+  tests: [
+    { call: 'chunk([1, 2, 3], 2)', expected: '[[1, 2], [3]]' },
+    // `setup` runs first; `call` may be several statements ending in an expression
+    { setup: 'data = [1, -2]', call: 'drop_negatives(data)\ndata', expected: '[1]' },
+  ],
+  solution: '...',
+  explanation: 'Why it works, and the trap it avoids.',
+  hints: ['Revealed one at a time.'],
+}
+```
+
+`call` and `expected` are Python source evaluated after the submitted code, each in a fresh copy of the
+namespace, so mutating tests cannot leak into one another. Run `npm run verify:challenges` afterwards.
 
 ## Disclaimer
 

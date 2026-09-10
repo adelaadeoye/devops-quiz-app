@@ -10,6 +10,7 @@ interface HomeProps {
   onResume: () => void;
   onDiscard: () => void;
   onStart: (config: QuizConfig) => void;
+  onOpenPythonLab: () => void;
 }
 
 const SIZE_OPTIONS: (number | 'all')[] = [10, 25, 50, 75, 'all'];
@@ -21,6 +22,7 @@ export default function Home({
   onResume,
   onDiscard,
   onStart,
+  onOpenPythonLab,
 }: HomeProps) {
   const [trackId, setTrackId] = useState<TrackId>(tracks[0].id);
   const [mode, setMode] = useState<QuizMode>('practice');
@@ -86,6 +88,30 @@ export default function Home({
           </div>
         </div>
       )}
+
+      <section className="mb-8">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-400">
+          Or write some code
+        </h2>
+        <button
+          type="button"
+          onClick={onOpenPythonLab}
+          className="flex w-full items-center justify-between gap-4 rounded-2xl border border-emerald-400/25 bg-emerald-400/[0.07] p-5 text-left transition hover:border-emerald-400/50 hover:bg-emerald-400/[0.12]"
+        >
+          <span>
+            <span className="block text-lg font-semibold text-emerald-300">
+              Python data structures lab
+            </span>
+            <span className="mt-2 block text-sm leading-relaxed text-slate-400">
+              150+ hands-on challenges on lists, dicts, sets, tuples and strings. Real Python runs
+              in your browser and grades your solution against a test suite.
+            </span>
+          </span>
+          <span className="shrink-0 rounded-full bg-emerald-400/15 px-3 py-1 font-mono text-xs text-emerald-300">
+            python
+          </span>
+        </button>
+      </section>
 
       <section className="mb-8">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-400">

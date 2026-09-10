@@ -6,4 +6,6 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   base: process.env.VITE_BASE_PATH ?? '/devops-quiz-app/',
   plugins: [react(), tailwindcss()],
+  // The Python worker loads Pyodide through a dynamic `import()` of a CDN URL.
+  worker: { format: 'es' },
 });
